@@ -25,10 +25,12 @@ const TestimonialsManagementPage = () => {
   const [errors, setErrors] = useState({});
 
   // Fetch testimonials
-  const { data: testimonials = [], isLoading } = useQuery({
+  const { data: testimonialsResponse, isLoading } = useQuery({
     queryKey: ['adminTestimonials'],
     queryFn: testimonialsService.getAdminTestimonials,
   });
+
+  const testimonials = testimonialsResponse?.data || [];
 
   // Create testimonial mutation
   const createMutation = useMutation({
@@ -160,7 +162,8 @@ const TestimonialsManagementPage = () => {
     if (!validateForm()) return;
 
     if (editingTestimonial) {
-      updateMutation.mutate({ id: editingTestimonial._id, data: formData });
+      const testimonialId = editingTestimonial._id || editingTestimonial.id;
+      updateMutation.mutate({ id: testimonialId, data: formData });
     } else {
       createMutation.mutate(formData);
     }
@@ -172,7 +175,8 @@ const TestimonialsManagementPage = () => {
 
   const confirmDelete = () => {
     if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm._id);
+      const testimonialId = deleteConfirm._id || deleteConfirm.id;
+      deleteMutation.mutate(testimonialId);
     }
   };
 
@@ -191,7 +195,11 @@ const TestimonialsManagementPage = () => {
     newTestimonials.splice(draggedItem, 1);
     newTestimonials.splice(index, 0, draggedTestimonial);
 
-    queryClient.setQueryData(['adminTestimonials'], newTestimonials);
+    // Update the query data with the proper structure
+    queryClient.setQueryData(['adminTestimonials'], (old) => ({
+      ...old,
+      data: newTestimonials,
+    }));
     setDraggedItem(index);
   };
 
@@ -560,7 +568,7 @@ const TestimonialsManagementPage = () => {
               Confirm Delete
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete the testimonial from "{deleteConfirm.authorName}"? This action cannot be undone.
+              Are you sure you want to delete the testimonial from &quot;{deleteConfirm.authorName}&quot;? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button

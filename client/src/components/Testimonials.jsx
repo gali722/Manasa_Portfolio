@@ -89,20 +89,8 @@ const Testimonials = () => {
     setCurrentIndex(index);
   };
 
-  if (isLoading) {
-    return (
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-surface rounded w-1/4 mx-auto mb-8"></div>
-            <div className="h-64 bg-surface rounded max-w-4xl mx-auto"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (testimonials.length === 0) {
+  // Only hide if no data after loading
+  if (!isLoading && testimonials.length === 0) {
     return null;
   }
 
@@ -206,8 +194,8 @@ const TestimonialCard = ({ testimonial }) => {
     <div className="w-full flex-shrink-0 px-4">
       <div className="bg-surface rounded-lg p-8 md:p-12 shadow-xl border border-border relative">
         {/* Quote Icon */}
-        <div className="absolute top-6 left-6 text-primary/20">
-          <Quote className="w-12 h-12 md:w-16 md:h-16" />
+        <div className="absolute top-6 left-6 text-primary/10">
+          <Quote className="w-6 h-6 md:w-8 md:h-8" />
         </div>
 
         {/* Content */}

@@ -71,21 +71,9 @@ const Education = () => {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
 
-  if (isLoading) {
-    return (
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-surface rounded w-1/4 mx-auto mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-48 bg-surface rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+  // Only hide if no data after loading
+  if (!isLoading && education.length === 0 && certifications.length === 0) {
+    return null;
   }
 
   return (

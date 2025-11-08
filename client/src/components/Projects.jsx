@@ -95,21 +95,9 @@ const Projects = ({ limit = null, showSearch = true }) => {
     ? filteredProjects.slice(0, limit)
     : filteredProjects;
 
-  if (isLoading) {
-    return (
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-surface rounded w-1/4 mx-auto mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-surface rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+  // Only hide if no data after loading
+  if (!isLoading && projects.length === 0) {
+    return null;
   }
 
   return (
@@ -224,7 +212,12 @@ const Projects = ({ limit = null, showSearch = true }) => {
 };
 
 const ProjectCard = ({ project, delay, isVisible, onClick }) => {
-  const thumbnail = project.images?.[0]?.url || '/placeholder-project.jpg';
+  const imageUrl = project.images?.[0]?.url;
+  const thumbnail = imageUrl
+    ? imageUrl.startsWith('http')
+      ? imageUrl
+      : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${imageUrl}`
+    : '/placeholder-project.jpg';
 
   return (
     <div

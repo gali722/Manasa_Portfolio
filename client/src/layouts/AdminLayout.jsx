@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -11,7 +11,7 @@ const AdminLayout = () => {
   const navigationItems = [
     {
       name: 'Dashboard',
-      path: '/admin/dashboard',
+      path: '/admin',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -97,7 +97,7 @@ const AdminLayout = () => {
 
   const getBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    const breadcrumbs = [{ name: 'Admin', path: '/admin/dashboard' }];
+    const breadcrumbs = [{ name: 'Admin', path: '/admin' }];
 
     if (pathSegments.length > 1) {
       const currentPage = pathSegments[pathSegments.length - 1];
@@ -118,18 +118,18 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="flex">
+    <div className="h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      <div className="flex h-full">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 dark:bg-gray-950 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 dark:bg-gray-950 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full overflow-hidden">
             {/* Logo/Brand */}
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <Link to="/admin/dashboard" className="flex items-center space-x-2">
+              <Link to="/admin" className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">M</span>
                 </div>
@@ -146,7 +146,7 @@ const AdminLayout = () => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto p-4">
+            <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
               <ul className="space-y-2">
                 {navigationItems.map((item) => (
                   <li key={item.path}>
@@ -191,9 +191,9 @@ const AdminLayout = () => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* Top Bar */}
-          <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-30">
+          <header className="bg-white dark:bg-gray-800 shadow-sm z-30 flex-shrink-0">
             <div className="flex items-center justify-between px-4 py-4">
               {/* Mobile Menu Button & Breadcrumbs */}
               <div className="flex items-center space-x-4">
@@ -252,7 +252,7 @@ const AdminLayout = () => {
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 overflow-y-auto">
             <Suspense
               fallback={
                 <div className="flex items-center justify-center py-12">

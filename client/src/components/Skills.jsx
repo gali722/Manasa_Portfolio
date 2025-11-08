@@ -13,8 +13,10 @@ const Skills = () => {
     const fetchSkills = async () => {
       try {
         const data = await skillsService.getPublicSkills();
+        console.log('Skills API Response:', data);
         if (data.success && data.data) {
           const visibleSkills = data.data.filter((skill) => skill.isVisible);
+          console.log('Visible Skills:', visibleSkills.length);
           setSkills(visibleSkills);
 
           // Extract unique categories
@@ -68,21 +70,9 @@ const Skills = () => {
     return acc;
   }, {});
 
-  if (isLoading) {
-    return (
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-surface rounded w-1/4 mx-auto mb-8"></div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-24 bg-surface rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+  // Only hide if no data after loading
+  if (!isLoading && skills.length === 0) {
+    return null;
   }
 
   return (

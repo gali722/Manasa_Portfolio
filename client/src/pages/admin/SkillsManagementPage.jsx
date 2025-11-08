@@ -19,10 +19,12 @@ const SkillsManagementPage = () => {
   const [errors, setErrors] = useState({});
 
   // Fetch skills
-  const { data: skills = [], isLoading } = useQuery({
+  const { data: skillsResponse, isLoading } = useQuery({
     queryKey: ['adminSkills'],
     queryFn: skillsService.getAdminSkills,
   });
+
+  const skills = skillsResponse?.data || [];
 
   // Create skill mutation
   const createMutation = useMutation({
@@ -124,7 +126,8 @@ const SkillsManagementPage = () => {
     if (!validateForm()) return;
 
     if (editingSkill) {
-      updateMutation.mutate({ id: editingSkill._id, data: formData });
+      const skillId = editingSkill._id || editingSkill.id;
+      updateMutation.mutate({ id: skillId, data: formData });
     } else {
       createMutation.mutate(formData);
     }
@@ -136,7 +139,8 @@ const SkillsManagementPage = () => {
 
   const confirmDelete = () => {
     if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm._id);
+      const skillId = deleteConfirm._id || deleteConfirm.id;
+      deleteMutation.mutate(skillId);
     }
   };
 
@@ -155,13 +159,13 @@ const SkillsManagementPage = () => {
     newSkills.splice(draggedItem, 1);
     newSkills.splice(index, 0, draggedSkill);
 
-    queryClient.setQueryData(['adminSkills'], newSkills);
+    queryClient.setQueryData(['adminSkills'], { data: newSkills });
     setDraggedItem(index);
   };
 
   const handleDragEnd = () => {
     if (draggedItem !== null) {
-      const skillsOrder = skills.map((skill) => skill._id);
+      const skillsOrder = skills.map((skill) => skill._id || skill.id);
       reorderMutation.mutate(skillsOrder);
     }
     setDraggedItem(null);

@@ -7,6 +7,7 @@ import Experience from '../../components/Experience';
 import Education from '../../components/Education';
 import Testimonials from '../../components/Testimonials';
 import SEO from '../../components/SEO';
+import DebugInfo from '../../components/DebugInfo';
 import { profileService } from '../../services/profileService';
 import {
   generatePersonStructuredData,
@@ -16,7 +17,7 @@ import {
 const HomePage = () => {
   const { data: profile } = useQuery({
     queryKey: ['profile'],
-    queryFn: profileService.getProfile,
+    queryFn: profileService.getPublicProfile,
   });
 
   const personStructuredData = generatePersonStructuredData(profile);

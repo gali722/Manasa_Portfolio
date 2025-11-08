@@ -34,11 +34,13 @@ createUploadDirs();
  */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Determine destination based on field name
+    // Determine destination based on field name or request path
     let folder = 'profile';
     
     if (file.fieldname.includes('resume')) {
       folder = 'resume';
+    } else if (file.fieldname.includes('images') && req.path.includes('projects')) {
+      folder = 'projects';
     } else if (file.fieldname.includes('project')) {
       folder = 'projects';
     } else if (file.fieldname.includes('company') || file.fieldname.includes('experience')) {

@@ -39,7 +39,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
+      imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:5173', 'http://localhost:5000'],
       fontSrc: ["'self'", 'https:', 'data:'],
       connectSrc: ["'self'"],
       frameSrc: ["'none'"],
@@ -99,6 +99,14 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve static files from uploads directory with CORS headers
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static('uploads'));
+
 // XSS Protection - sanitize user input
 app.use(xssProtection);
 
@@ -116,7 +124,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Import cache control middleware
-import { cachePublic, noCache } from './middleware/cacheControl.js';
+import { noCache } from './middleware/cacheControl.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
@@ -130,6 +138,7 @@ import certificationRoutes from './routes/certificationRoutes.js';
 import testimonialRoutes from './routes/testimonialRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import backupRoutes from './routes/backupRoutes.js';
 
 // Routes with appropriate caching
 app.use('/api/auth', noCache, authRoutes);
@@ -143,6 +152,7 @@ app.use('/api', certificationRoutes);
 app.use('/api', testimonialRoutes);
 app.use('/api/analytics', noCache, analyticsRoutes);
 app.use('/api', contactRoutes);
+app.use('/api/admin', noCache, backupRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -14,6 +14,8 @@ const Hero = () => {
         const data = await profileService.getPublicProfile();
         if (data.success && data.data) {
           setProfile(data.data);
+          console.log('Profile data:', data.data);
+          console.log('Profile photo URL:', data.data.profilePhoto?.url);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -25,17 +27,27 @@ const Hero = () => {
     fetchProfile();
   }, []);
 
-  const handleDownloadResume = async () => {
+  const handleDownloadResume = () => {
+    if (!profile?.resume?.url) {
+      console.error('No resume available');
+      return;
+    }
+
     try {
-      const blob = await profileService.downloadResume();
-      const url = window.URL.createObjectURL(blob);
+      // Construct full URL for the resume
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const resumeUrl = profile.resume.url.startsWith('http') 
+        ? profile.resume.url 
+        : `${apiUrl}${profile.resume.url}`;
+      
+      // Create a temporary link and trigger download
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `${profile?.fullName || 'Manasa_Gali'}_Resume.pdf`;
+      link.href = resumeUrl;
+      link.download = profile.resume.filename || `${profile.fullName}_Resume.pdf`;
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading resume:', error);
     }
@@ -80,7 +92,7 @@ const Hero = () => {
           <div className="flex-1 text-center lg:text-left">
             <div className="mb-6">
               <h2 className="text-lg md:text-xl text-text-secondary mb-2 animate-fade-in-up">
-                Hello, I'm
+                Hello, I&apos;m
               </h2>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-text-primary mb-4 animate-fade-in-up animation-delay-200">
                 {profile?.fullName || 'Manasa Gali'}
@@ -125,11 +137,14 @@ const Hero = () => {
               <div className="absolute -inset-4 bg-gradient-to-r from-primary via-secondary to-accent rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500 animate-pulse"></div>
               <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden border-4 border-surface shadow-2xl transform group-hover:scale-105 transition-transform duration-500">
                 {profile?.profilePhoto?.url ? (
-                  <LazyImage
-                    src={profile.profilePhoto.url}
-                    alt={`${profile.fullName} - Professional headshot`}
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    {console.log('Image URL:', profile.profilePhoto.url.startsWith('http') ? profile.profilePhoto.url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${profile.profilePhoto.url}`)}
+                    <LazyImage
+                      src={profile.profilePhoto.url.startsWith('http') ? profile.profilePhoto.url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${profile.profilePhoto.url}`}
+                      alt={`${profile.fullName} - Professional headshot`}
+                      className="w-full h-full object-cover"
+                    />
+                  </>
                 ) : (
                   <div 
                     className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-6xl font-bold"

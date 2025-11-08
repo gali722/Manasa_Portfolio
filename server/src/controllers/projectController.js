@@ -272,11 +272,15 @@ export const uploadProjectImages = async (req, res, next) => {
     const project = await Project.findByIdOrFail(req.params.id);
 
     // Add new images
-    const newImages = req.files.map((file, index) => ({
-      url: `/uploads/${file.filename}`,
-      caption: '',
-      order: (project.images?.length || 0) + index,
-    }));
+    const newImages = req.files.map((file, index) => {
+      // Extract the relative path from the full path
+      const relativePath = file.path.replace(/\\/g, '/').split('uploads/')[1];
+      return {
+        url: `/uploads/${relativePath}`,
+        caption: '',
+        order: (project.images?.length || 0) + index,
+      };
+    });
 
     project.images = [...(project.images || []), ...newImages];
 

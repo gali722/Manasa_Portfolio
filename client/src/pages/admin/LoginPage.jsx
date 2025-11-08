@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const LoginPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from?.pathname || '/admin/dashboard';
+      const from = location.state?.from?.pathname || '/admin';
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);

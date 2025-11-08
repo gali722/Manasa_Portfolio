@@ -39,16 +39,20 @@ const EducationManagementPage = () => {
   const [errors, setErrors] = useState({});
 
   // Fetch education
-  const { data: education = [], isLoading: educationLoading } = useQuery({
+  const { data: educationResponse, isLoading: educationLoading } = useQuery({
     queryKey: ['adminEducation'],
     queryFn: educationService.getAdminEducation,
   });
 
+  const education = educationResponse?.data || [];
+
   // Fetch certifications
-  const { data: certifications = [], isLoading: certificationsLoading } = useQuery({
+  const { data: certificationsResponse, isLoading: certificationsLoading } = useQuery({
     queryKey: ['adminCertifications'],
     queryFn: certificationsService.getAdminCertifications,
   });
+
+  const certifications = certificationsResponse?.data || [];
 
   // Education mutations
   const createEducationMutation = useMutation({
@@ -278,14 +282,16 @@ const EducationManagementPage = () => {
     if (activeTab === 'education') {
       if (!validateEducationForm()) return;
       if (editingItem) {
-        updateEducationMutation.mutate({ id: editingItem._id, data: educationForm });
+        const itemId = editingItem._id || editingItem.id;
+        updateEducationMutation.mutate({ id: itemId, data: educationForm });
       } else {
         createEducationMutation.mutate(educationForm);
       }
     } else {
       if (!validateCertificationForm()) return;
       if (editingItem) {
-        updateCertificationMutation.mutate({ id: editingItem._id, data: certificationForm });
+        const itemId = editingItem._id || editingItem.id;
+        updateCertificationMutation.mutate({ id: itemId, data: certificationForm });
       } else {
         createCertificationMutation.mutate(certificationForm);
       }
@@ -298,10 +304,11 @@ const EducationManagementPage = () => {
 
   const confirmDelete = () => {
     if (deleteConfirm) {
+      const itemId = deleteConfirm._id || deleteConfirm.id;
       if (deleteConfirm.type === 'education') {
-        deleteEducationMutation.mutate(deleteConfirm._id);
+        deleteEducationMutation.mutate(itemId);
       } else {
-        deleteCertificationMutation.mutate(deleteConfirm._id);
+        deleteCertificationMutation.mutate(itemId);
       }
     }
   };

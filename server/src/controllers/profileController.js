@@ -145,8 +145,10 @@ export const uploadProfilePhoto = async (req, res, next) => {
     }
 
     // Update profile with new photo
+    // Extract the relative path from the full path (e.g., "uploads/profile/filename.jpg")
+    const relativePath = req.file.path.replace(/\\/g, '/').split('uploads/')[1];
     profile.profilePhoto = {
-      url: `/uploads/${req.file.filename}`,
+      url: `/uploads/${relativePath}`,
       publicId: req.file.filename,
       uploadedAt: new Date(),
     };
@@ -204,8 +206,10 @@ export const uploadResume = async (req, res, next) => {
     const oldResume = profile.resume?.url;
 
     // Update profile with new resume
+    // Extract the relative path from the full path (e.g., "uploads/resume/filename.docx")
+    const relativePath = req.file.path.replace(/\\/g, '/').split('uploads/')[1];
     profile.resume = {
-      url: `/uploads/${req.file.filename}`,
+      url: `/uploads/${relativePath}`,
       filename: req.file.originalname,
       uploadedAt: new Date(),
     };

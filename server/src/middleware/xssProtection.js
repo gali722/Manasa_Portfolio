@@ -26,7 +26,7 @@ const sanitizeObject = (obj) => {
   if (typeof obj === 'object') {
     const sanitized = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         sanitized[key] = sanitizeObject(obj[key]);
       }
     }
@@ -44,24 +44,34 @@ export const xssProtection = (req, res, next) => {
   try {
     // Skip sanitization for rich text fields that are handled by validation middleware
     const richTextFields = ['summary', 'description', 'fullDescription', 'content'];
+    // Skip sanitization for URL fields and nested objects containing URLs
+    const urlFields = ['socialLinks', 'links', 'url', 'verificationUrl', 'linkedinUrl'];
+    // Skip sanitization for fields that may contain special characters like / or -
+    const specialCharFields = ['gpa', 'credentialId'];
+    // Skip sanitization for array fields that may contain special characters
+    const arrayFields = ['achievements', 'responsibilities', 'coursework', 'technologies'];
+    
     const skipSanitization = (obj, path = '') => {
       if (!obj || typeof obj !== 'object') return false;
       
       for (const field of richTextFields) {
-        if (path.endsWith(field) || obj.hasOwnProperty(field)) {
+        if (path.endsWith(field) || Object.prototype.hasOwnProperty.call(obj, field)) {
           return true;
         }
       }
       return false;
     };
 
-    // Sanitize body (but skip rich text fields as they're handled separately)
+    // Sanitize body (but skip rich text fields and URL fields as they're handled separately)
     if (req.body && typeof req.body === 'object') {
       const sanitizedBody = {};
       for (const key in req.body) {
-        if (req.body.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(req.body, key)) {
           // Skip rich text fields - they're sanitized by validation middleware
-          if (richTextFields.includes(key)) {
+          // Skip URL fields - they're validated by validation middleware
+          // Skip special char fields - they may contain / or - characters
+          // Skip array fields - they're validated by validation middleware
+          if (richTextFields.includes(key) || urlFields.includes(key) || specialCharFields.includes(key) || arrayFields.includes(key)) {
             sanitizedBody[key] = req.body[key];
           } else {
             sanitizedBody[key] = sanitizeObject(req.body[key]);

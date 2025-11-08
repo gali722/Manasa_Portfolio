@@ -173,22 +173,22 @@ export const deleteSkill = async (req, res, next) => {
  */
 export const reorderSkills = async (req, res, next) => {
   try {
-    const { skills } = req.body;
+    const { skillsOrder } = req.body;
 
-    if (!Array.isArray(skills)) {
+    if (!Array.isArray(skillsOrder)) {
       return res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: 'Skills must be an array',
+          message: 'skillsOrder must be an array',
         },
       });
     }
 
     // Update order for each skill
-    const updatePromises = skills.map((item, index) => {
+    const updatePromises = skillsOrder.map((skillId, index) => {
       return Skill.findByIdAndUpdate(
-        item.id,
+        skillId,
         { order: index },
         { new: true, runValidators: true }
       );

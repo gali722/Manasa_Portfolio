@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { backupService } from '../../services/backupService';
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('password'); // 'password', 'notifications', 'backup'
@@ -79,12 +80,25 @@ const SettingsPage = () => {
   const handleBackup = async () => {
     setBackupLoading(true);
     try {
-      // TODO: Implement backup API call
-      console.log('Creating backup...');
-      // Simulate backup creation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Backup created successfully!');
+      const response = await backupService.createBackup();
+      
+      if (response.success && response.data.backup) {
+        // Create a downloadable file
+        const dataStr = JSON.stringify(response.data.backup, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `portfolio-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        alert('Backup created and downloaded successfully!');
+      }
     } catch (error) {
+      console.error('Backup error:', error);
       alert('Backup failed. Please try again.');
     } finally {
       setBackupLoading(false);
@@ -102,13 +116,25 @@ const SettingsPage = () => {
 
     setRestoreLoading(true);
     try {
-      // TODO: Implement restore API call
-      console.log('Restoring from backup:', file.name);
-      // Simulate restore
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Data restored successfully!');
+      // Read the backup file
+      const fileContent = await file.text();
+      const backupData = JSON.parse(fileContent);
+      
+      // Validate backup structure
+      if (!backupData.data || !backupData.timestamp) {
+        throw new Error('Invalid backup file format');
+      }
+      
+      // Restore the backup
+      const response = await backupService.restoreBackup(backupData);
+      
+      if (response.success) {
+        alert('Data restored successfully! The page will reload.');
+        window.location.reload();
+      }
     } catch (error) {
-      alert('Restore failed. Please try again.');
+      console.error('Restore error:', error);
+      alert(`Restore failed: ${error.message || 'Please try again.'}`);
     } finally {
       setRestoreLoading(false);
       e.target.value = '';

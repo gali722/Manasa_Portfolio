@@ -31,10 +31,12 @@ const ProfileManagementPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch profile data
-  const { data: profile, isLoading } = useQuery({
+  const { data: profileResponse, isLoading } = useQuery({
     queryKey: ['adminProfile'],
     queryFn: profileService.getAdminProfile,
   });
+
+  const profile = profileResponse?.data;
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -80,6 +82,9 @@ const ProfileManagementPage = () => {
   // Load profile data into form
   useEffect(() => {
     if (profile) {
+      console.log('Admin Profile Data:', profile);
+      console.log('Profile Photo Object:', profile.profilePhoto);
+      
       setFormData({
         fullName: profile.fullName || '',
         title: profile.title || '',
@@ -97,7 +102,18 @@ const ProfileManagementPage = () => {
         },
       });
       if (profile.profilePhoto?.url) {
-        setPhotoPreview(profile.profilePhoto.url);
+        // Construct full URL for the photo
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const photoUrl = profile.profilePhoto.url.startsWith('http') 
+          ? profile.profilePhoto.url 
+          : `${apiUrl}${profile.profilePhoto.url}`;
+        console.log('Profile Photo URL from API:', profile.profilePhoto.url);
+        console.log('Constructed Photo URL:', photoUrl);
+        console.log('API URL:', apiUrl);
+        console.log('Setting photoPreview to:', photoUrl);
+        setPhotoPreview(photoUrl);
+      } else {
+        console.log('No profile photo found in profile data');
       }
     }
   }, [profile]);
@@ -226,6 +242,68 @@ const ProfileManagementPage = () => {
         Profile Management
       </h1>
 
+      {/* Current Profile Overview */}
+      {profile && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Current Profile Information
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Name:</span>
+              <span className="ml-2 text-gray-900 dark:text-white">{profile.fullName || 'Not set'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Title:</span>
+              <span className="ml-2 text-gray-900 dark:text-white">{profile.title || 'Not set'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Email:</span>
+              <span className="ml-2 text-gray-900 dark:text-white">{profile.email || 'Not set'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Phone:</span>
+              <span className="ml-2 text-gray-900 dark:text-white">{profile.phone || 'Not set'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Location:</span>
+              <span className="ml-2 text-gray-900 dark:text-white">{profile.location || 'Not set'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Experience:</span>
+              <span className="ml-2 text-gray-900 dark:text-white">{profile.yearsOfExperience || 0} years</span>
+            </div>
+            <div className="md:col-span-2">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Summary:</span>
+              <p className="ml-2 text-gray-900 dark:text-white mt-1">{profile.summary || 'Not set'}</p>
+            </div>
+            <div className="md:col-span-2">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Social Links:</span>
+              <div className="ml-2 mt-1 space-y-1">
+                {profile.socialLinks?.linkedin && (
+                  <div className="text-gray-900 dark:text-white">LinkedIn: {profile.socialLinks.linkedin}</div>
+                )}
+                {profile.socialLinks?.github && (
+                  <div className="text-gray-900 dark:text-white">GitHub: {profile.socialLinks.github}</div>
+                )}
+                {profile.socialLinks?.twitter && (
+                  <div className="text-gray-900 dark:text-white">Twitter: {profile.socialLinks.twitter}</div>
+                )}
+                {!profile.socialLinks?.linkedin && !profile.socialLinks?.github && !profile.socialLinks?.twitter && (
+                  <div className="text-gray-500 dark:text-gray-400">No social links set</div>
+                )}
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-blue-600 dark:text-blue-400 mt-4">
+            ℹ️ Edit the form below to update your profile information
+          </p>
+        </div>
+      )}
+
       {/* Success Message */}
       {successMessage && (
         <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
@@ -250,6 +328,7 @@ const ProfileManagementPage = () => {
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Profile Photo
         </h2>
+        {console.log('Rendering photo section, photoPreview:', photoPreview)}
         <div className="flex items-center space-x-6">
           <div className="relative">
             {photoPreview ? (
@@ -257,14 +336,25 @@ const ProfileManagementPage = () => {
                 src={photoPreview}
                 alt="Profile"
                 className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
+                onError={(e) => {
+                  console.error('Image failed to load:', photoPreview);
+                  console.error('Error event:', e);
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully:', photoPreview);
+                }}
               />
-            ) : (
-              <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            )}
+            ) : null}
+            <div 
+              className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+              style={{ display: photoPreview ? 'none' : 'flex' }}
+            >
+              <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
           </div>
           <div className="flex-1">
             <input

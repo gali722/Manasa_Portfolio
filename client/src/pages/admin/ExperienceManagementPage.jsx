@@ -30,10 +30,12 @@ const ExperienceManagementPage = () => {
   const [errors, setErrors] = useState({});
 
   // Fetch experience
-  const { data: experiences = [], isLoading } = useQuery({
+  const { data: experienceResponse, isLoading } = useQuery({
     queryKey: ['adminExperience'],
     queryFn: experienceService.getAdminExperience,
   });
+
+  const experiences = experienceResponse?.data || [];
 
   // Create experience mutation
   const createMutation = useMutation({
@@ -220,7 +222,8 @@ const ExperienceManagementPage = () => {
     if (!validateForm()) return;
 
     if (editingExperience) {
-      updateMutation.mutate({ id: editingExperience._id, data: formData });
+      const experienceId = editingExperience._id || editingExperience.id;
+      updateMutation.mutate({ id: experienceId, data: formData });
     } else {
       createMutation.mutate(formData);
     }
@@ -232,7 +235,8 @@ const ExperienceManagementPage = () => {
 
   const confirmDelete = () => {
     if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm._id);
+      const experienceId = deleteConfirm._id || deleteConfirm.id;
+      deleteMutation.mutate(experienceId);
     }
   };
 
@@ -736,7 +740,7 @@ const ExperienceManagementPage = () => {
               Confirm Delete
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete the experience at "{deleteConfirm.company}"? This action cannot be undone.
+              Are you sure you want to delete the experience at "{deleteConfirm.company}&quot;? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button

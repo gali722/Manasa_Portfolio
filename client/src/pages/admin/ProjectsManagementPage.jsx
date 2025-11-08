@@ -29,17 +29,29 @@ const ProjectsManagementPage = () => {
   const [errors, setErrors] = useState({});
 
   // Fetch projects
-  const { data: projects = [], isLoading } = useQuery({
+  const { data: projectsResponse, isLoading } = useQuery({
     queryKey: ['adminProjects'],
     queryFn: projectsService.getAdminProjects,
   });
 
+  const projects = projectsResponse?.data || [];
+  
+  // Debug: Log projects to see their structure
+  if (projects.length > 0) {
+    console.log('First project structure:', projects[0]);
+    console.log('First project ID field:', projects[0]._id, projects[0].id);
+  }
+
   // Create project mutation
   const createMutation = useMutation({
     mutationFn: projectsService.createProject,
-    onSuccess: async (data) => {
+    onSuccess: async (response) => {
       if (selectedImages.length > 0) {
-        await uploadImagesMutation.mutateAsync({ id: data._id, files: selectedImages });
+        // API returns { success: true, data: project }
+        const projectId = response.data?._id || response.data?.id;
+        if (projectId) {
+          await uploadImagesMutation.mutateAsync({ id: projectId, files: selectedImages });
+        }
       }
       queryClient.invalidateQueries(['adminProjects']);
       closeModal();
@@ -49,9 +61,10 @@ const ProjectsManagementPage = () => {
   // Update project mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => projectsService.updateProject(id, data),
-    onSuccess: async (data) => {
+    onSuccess: async (response, variables) => {
       if (selectedImages.length > 0) {
-        await uploadImagesMutation.mutateAsync({ id: data._id, files: selectedImages });
+        // Use the ID from variables (the input) instead of response
+        await uploadImagesMutation.mutateAsync({ id: variables.id, files: selectedImages });
       }
       queryClient.invalidateQueries(['adminProjects']);
       closeModal();
@@ -74,6 +87,8 @@ const ProjectsManagementPage = () => {
 
   const openModal = (project = null) => {
     if (project) {
+      console.log('Opening modal with project:', project);
+      console.log('Project ID:', project._id);
       setEditingProject(project);
       setFormData({
         title: project.title,
@@ -208,7 +223,14 @@ const ProjectsManagementPage = () => {
     if (!validateForm()) return;
 
     if (editingProject) {
-      updateMutation.mutate({ id: editingProject._id, data: formData });
+      console.log('Submitting update for project:', editingProject);
+      console.log('Project _id:', editingProject._id);
+      console.log('Project id:', editingProject.id);
+      console.log('Form data:', formData);
+      // Use _id or id, whichever exists
+      const projectId = editingProject._id || editingProject.id;
+      console.log('Using project ID:', projectId);
+      updateMutation.mutate({ id: projectId, data: formData });
     } else {
       createMutation.mutate(formData);
     }
@@ -220,7 +242,8 @@ const ProjectsManagementPage = () => {
 
   const confirmDelete = () => {
     if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm._id);
+      const projectId = deleteConfirm._id || deleteConfirm.id;
+      deleteMutation.mutate(projectId);
     }
   };
 
@@ -267,7 +290,11 @@ const ProjectsManagementPage = () => {
               <div className="h-48 bg-gray-200 dark:bg-gray-700 relative">
                 {project.images && project.images.length > 0 ? (
                   <img
-                    src={project.images[0].url}
+                    src={
+                      project.images[0].url.startsWith('http')
+                        ? project.images[0].url
+                        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${project.images[0].url}`
+                    }
                     alt={project.title}
                     className="w-full h-full object-cover"
                   />
@@ -614,7 +641,7 @@ const ProjectsManagementPage = () => {
               Confirm Delete
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete the project "{deleteConfirm.title}"? This action cannot be undone.
+              Are you sure you want to delete the project &quot;{deleteConfirm.title}&quot;? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button

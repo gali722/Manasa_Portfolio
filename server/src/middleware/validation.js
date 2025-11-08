@@ -128,7 +128,7 @@ export const validateProfile = [
   body('phone')
     .optional()
     .trim()
-    .matches(/^[\d\s\-\+\(\)]+$/)
+    .matches(/^[\d\s\-+()]+$/)
     .withMessage('Please provide a valid phone number')
     .isLength({ max: 20 })
     .withMessage('Phone number cannot exceed 20 characters'),
@@ -139,27 +139,27 @@ export const validateProfile = [
     .withMessage('Location cannot exceed 200 characters')
     .escape(),
   body('socialLinks.linkedin')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid LinkedIn URL'),
   body('socialLinks.github')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid GitHub URL'),
   body('socialLinks.twitter')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid Twitter URL'),
   body('socialLinks.medium')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid Medium URL'),
   body('socialLinks.stackoverflow')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid Stack Overflow URL'),
@@ -283,17 +283,17 @@ export const validateProject = [
     .withMessage('Category cannot exceed 100 characters')
     .escape(),
   body('links.live')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid live demo URL'),
   body('links.github')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid GitHub URL'),
   body('links.demo')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid demo URL'),
@@ -338,7 +338,7 @@ export const validateExperience = [
     .isISO8601()
     .withMessage('Please provide a valid start date'),
   body('endDate')
-    .optional({ nullable: true })
+    .optional({ nullable: true, checkFalsy: true })
     .isISO8601()
     .withMessage('Please provide a valid end date'),
   body('isCurrent')
@@ -416,19 +416,18 @@ export const validateEducation = [
     .withMessage('Location cannot exceed 200 characters')
     .escape(),
   body('startDate')
-    .optional()
+    .optional({ checkFalsy: true })
     .isISO8601()
     .withMessage('Please provide a valid start date'),
   body('endDate')
-    .optional()
+    .optional({ checkFalsy: true })
     .isISO8601()
     .withMessage('Please provide a valid end date'),
   body('gpa')
     .optional()
     .trim()
     .isLength({ max: 20 })
-    .withMessage('GPA cannot exceed 20 characters')
-    .escape(),
+    .withMessage('GPA cannot exceed 20 characters'),
   body('coursework')
     .optional()
     .isArray()
@@ -476,17 +475,16 @@ export const validateCertification = [
     .isISO8601()
     .withMessage('Please provide a valid issue date'),
   body('expiryDate')
-    .optional({ nullable: true })
+    .optional({ nullable: true, checkFalsy: true })
     .isISO8601()
     .withMessage('Please provide a valid expiry date'),
   body('credentialId')
     .optional()
     .trim()
     .isLength({ max: 200 })
-    .withMessage('Credential ID cannot exceed 200 characters')
-    .escape(),
+    .withMessage('Credential ID cannot exceed 200 characters'),
   body('verificationUrl')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid verification URL'),
@@ -525,7 +523,7 @@ export const validateTestimonial = [
     .withMessage('Content must be between 10 and 2000 characters')
     .escape(),
   body('linkedinUrl')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Please provide a valid LinkedIn URL'),
