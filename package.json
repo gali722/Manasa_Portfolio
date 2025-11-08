@@ -14,9 +14,15 @@
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm install --production",
+    "build": "npm run build:client && npm run build:server",
     "lint:client": "cd client && npm run lint",
     "lint:server": "cd server && npm run lint",
-    "lint": "npm run lint:client && npm run lint:server"
+    "lint": "npm run lint:client && npm run lint:server",
+    "verify:deployment": "node scripts/verify-deployment.js",
+    "test:deployment": "./scripts/test-deployment.sh",
+    "test:lighthouse": "./scripts/lighthouse-audit.sh",
+    "test:lighthouse:full": "./scripts/lighthouse-audit.sh --full"
   },
   "keywords": [
     "portfolio",
