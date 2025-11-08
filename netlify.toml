@@ -1,11 +1,9 @@
 [build]
-  base = "client"
-  command = "rm -f ../package.json && npm install && npm run build"
-  publish = "dist"
+  command = "bash build-client.sh"
+  publish = "client/dist"
 
 [build.environment]
   NODE_VERSION = "22"
-  NPM_CONFIG_WORKSPACES = "false"
 
 [[redirects]]
   from = "/*"
