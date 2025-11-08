@@ -46,15 +46,28 @@ const ProjectsManagementPage = () => {
   const createMutation = useMutation({
     mutationFn: projectsService.createProject,
     onSuccess: async (response) => {
-      if (selectedImages.length > 0) {
-        // API returns { success: true, data: project }
-        const projectId = response.data?._id || response.data?.id;
-        if (projectId) {
-          await uploadImagesMutation.mutateAsync({ id: projectId, files: selectedImages });
+      try {
+        if (selectedImages.length > 0) {
+          // API returns { success: true, data: project }
+          const projectId = response.data?._id || response.data?.id;
+          if (projectId) {
+            await uploadImagesMutation.mutateAsync({ id: projectId, files: selectedImages });
+          }
         }
+        queryClient.invalidateQueries(['adminProjects']);
+        closeModal();
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        // Still close modal and refresh - project was created
+        queryClient.invalidateQueries(['adminProjects']);
+        closeModal();
+        alert('Project created but image upload failed. Please edit the project to add images.');
       }
-      queryClient.invalidateQueries(['adminProjects']);
-      closeModal();
+    },
+    onError: (error) => {
+      console.error('Error creating project:', error);
+      const errorMessage = error.response?.data?.error?.message || error.response?.data?.error?.details?.[0]?.message || 'Failed to create project';
+      alert(`Error: ${errorMessage}`);
     },
   });
 
