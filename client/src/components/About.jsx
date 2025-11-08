@@ -32,32 +32,20 @@ const About = () => {
       { threshold: 0.1 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentSection = sectionRef.current;
+    if (currentSection) {
+      observer.observe(currentSection);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+      if (currentSection) {
+        observer.unobserve(currentSection);
       }
     };
   }, []);
 
-  // Show section even if profile is still loading
-  if (!profile) {
-    return (
-      <section id="about" className="py-20 bg-surface/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 w-48 bg-surface rounded mx-auto mb-4"></div>
-              <div className="h-1 w-20 bg-surface rounded mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Don't hide section while loading - show loading state instead
+  const isLoading = !profile;
 
   return (
     <section
@@ -81,22 +69,30 @@ const About = () => {
             <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
           </div>
 
-          <div className="max-w-6xl mx-auto">
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-              {/* Professional Summary */}
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-text-primary mb-4 flex items-center">
-                    <Briefcase className="w-6 h-6 mr-3 text-primary" />
-                    Professional Summary
-                  </h3>
-                  <div
-                    className="text-text-secondary leading-relaxed text-base space-y-3"
-                    dangerouslySetInnerHTML={{ __html: profile.summary }}
-                  />
-                </div>
+          {isLoading ? (
+            <div className="max-w-6xl mx-auto">
+              <div className="animate-pulse space-y-6">
+                <div className="h-32 bg-surface rounded-xl"></div>
+                <div className="h-32 bg-surface rounded-xl"></div>
               </div>
+            </div>
+          ) : (
+            <div className="max-w-6xl mx-auto">
+              {/* Main Content */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+                {/* Professional Summary */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-text-primary mb-4 flex items-center">
+                      <Briefcase className="w-6 h-6 mr-3 text-primary" />
+                      Professional Summary
+                    </h3>
+                    <div
+                      className="text-text-secondary leading-relaxed text-base space-y-3"
+                      dangerouslySetInnerHTML={{ __html: profile.summary }}
+                    />
+                  </div>
+                </div>
 
               {/* Stats and Contact */}
               <div className="space-y-6">
@@ -155,21 +151,22 @@ const About = () => {
               </div>
             </div>
 
-            {/* Skills Highlight */}
-            {profile.title && (
-              <div className="bg-background rounded-xl p-8 shadow-lg border border-border">
-                <div className="flex items-center mb-4">
-                  <Code className="w-6 h-6 mr-3 text-primary" />
-                  <h3 className="text-xl font-bold text-text-primary">
-                    Expertise
-                  </h3>
+              {/* Skills Highlight */}
+              {profile.title && (
+                <div className="bg-background rounded-xl p-8 shadow-lg border border-border">
+                  <div className="flex items-center mb-4">
+                    <Code className="w-6 h-6 mr-3 text-primary" />
+                    <h3 className="text-xl font-bold text-text-primary">
+                      Expertise
+                    </h3>
+                  </div>
+                  <p className="text-text-secondary text-lg">
+                    {profile.title}
+                  </p>
                 </div>
-                <p className="text-text-secondary text-lg">
-                  {profile.title}
-                </p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>

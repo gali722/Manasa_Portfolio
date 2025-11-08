@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import Hero from '../../components/Hero';
-import About from '../../components/About';
-import Skills from '../../components/Skills';
-import Projects from '../../components/Projects';
+import Hero3D from '../../components/Hero3D';
+import About3D from '../../components/About3D';
+import Skills3D from '../../components/Skills3D';
+import Projects3D from '../../components/Projects3D';
 import Experience from '../../components/Experience';
 import Education from '../../components/Education';
 import Testimonials from '../../components/Testimonials';
 import SEO from '../../components/SEO';
-import DebugInfo from '../../components/DebugInfo';
 import { profileService } from '../../services/profileService';
 import {
   generatePersonStructuredData,
@@ -37,10 +36,10 @@ const HomePage = () => {
         canonicalUrl="/"
         structuredData={structuredData}
       />
-      <Hero />
-      <About />
-      <Skills />
-      <Projects limit={6} showSearch={false} />
+      <Hero3D />
+      <About3D />
+      <Skills3D />
+      <Projects3D limit={6} showSearch={false} />
       <Experience />
       <Education />
       <Testimonials />
